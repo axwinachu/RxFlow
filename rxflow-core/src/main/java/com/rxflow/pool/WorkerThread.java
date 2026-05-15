@@ -38,7 +38,7 @@ public class WorkerThread extends Thread{
         if(task.isPresent())return task;
         int n=allQueues.size();
         for(int i=1;i<n;i++){
-            WorkerQueue sibling=allQueues.get((index+1)%n);
+            WorkerQueue sibling=allQueues.get((index+i)%n);
             task=sibling.trySteal();
             if (task.isPresent()) return task;
         }
@@ -66,6 +66,14 @@ public class WorkerThread extends Thread{
         }catch (InterruptedException ex){
             Thread.currentThread().interrupt();
         }finally {
+            sleepLock.unlock();
+        }
+    }
+    public void signal() {
+        sleepLock.lock();
+        try {
+            workReady.signal();
+        } finally {
             sleepLock.unlock();
         }
     }
